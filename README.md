@@ -8,8 +8,7 @@ Setup (one time, all in a web browser):
    "uploading an existing file", and drag in everything inside this folder
    (index.html is in "public", the save function is in "netlify/functions").
 2. Netlify: Add new site → Import an existing project → GitHub → pick the repository → Deploy.
-3. Netlify: Site configuration → Environment variables → Add variable
-   Key: COACH_PIN   Value: a PIN only the coach knows (6+ characters).
-   Then Deploys → Trigger deploy → Deploy site.
+3. No PIN setup needed: the coach PIN is built into the save function.
+   (Optional, if your plan allows it: a COACH_PIN environment variable in Netlify replaces it.)
 4. Open the site link → Squad tab → Coach access → enter the PIN.
 5. Optional: to bring over plans from the old file, Export backup there and Import backup here.

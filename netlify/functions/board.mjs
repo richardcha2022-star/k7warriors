@@ -1,6 +1,11 @@
 // K7 Warriors board storage: everyone can read, only the coach PIN can write.
-// Set the COACH_PIN environment variable in Netlify (Site configuration → Environment variables).
+// Coach PIN: the built-in PIN is stored only as a SHA-256 fingerprint below.
+// If a COACH_PIN environment variable is ever set in Netlify, it replaces the built-in PIN.
 import { getStore } from "@netlify/blobs";
+import { createHash } from "node:crypto";
+
+const PIN_SHA256 = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
+const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 
 const MATCHES = ["m1", "m2", "m3", "m4", "m5", "m6", "m7"];
 const KEYS = ["roster", ...MATCHES];
@@ -24,11 +29,12 @@ export default async (req) => {
 
   if (req.method !== "POST") return json({ ok: false, error: "method_not_allowed" }, 405);
 
-  const pin = process.env.COACH_PIN;
-  if (!pin) return json({ ok: false, error: "COACH_PIN is not set on the site" }, 500);
+  const envPin = process.env.COACH_PIN;
   let body;
   try { body = await req.json(); } catch { return json({ ok: false, error: "bad_json" }, 400); }
-  if (String(body.pin || "") !== pin) {
+  const given = String(body.pin || "");
+  const okPin = envPin ? given === envPin : sha256(given) === PIN_SHA256;
+  if (!okPin) {
     await new Promise((r) => setTimeout(r, 800)); // slow down PIN guessing
     return json({ ok: false, error: "wrong_pin" }, 401);
   }
